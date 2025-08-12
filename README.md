@@ -68,3 +68,23 @@ Then run `python etl/etl_s3.py` again and a new Parquet will land in today's par
 ## Notes
 - This is a simple polling CDC. For true real-time you could use Debezium or
   logical decoding → Kafka → Spark/NiFi — but this keeps things beginner-friendly.
+  # PostgreSQL → S3 Real-Time ETL (Parquet)
+
+A minimal pipeline that reads **new/updated** rows from PostgreSQL, does light transforms with **Pandas**, and writes **Parquet** to **Amazon S3** in `/raw/YYYY/MM/DD/`. Includes an optional **Airflow** DAG (every 5 minutes).
+
+## Quickstart
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r etl\requirements.txt
+
+# create table + sample data
+psql -h 127.0.0.1 -U postgres -d postgres -f sql\create_tables.sql
+psql -h 127.0.0.1 -U postgres -d postgres -f sql\seed_orders.sql
+
+# configure
+copy etl\.env.example etl\.env
+notepad etl\.env   # set PG_* and S3_BUCKET
+
+# run
+python etl\etl_s3.py
